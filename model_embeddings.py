@@ -7,12 +7,11 @@ from sentence_transformers import SentenceTransformer
 models = {'bert':'bert-base-uncased',
           'roberta':'sentence-transformers/stsb-roberta-large'}
 class modelEmbeddings:
-    def __init__(self, model_type:str, load_direct= False)-> None:
+    def __init__(self, model_type:str = 'bert', load_direct= False)-> None:
         """Inititalize model embeddings.
         
         Parameters
         ----------
-
         model_type: str
             Type of transformer model to use
             Options: bert, roberta, elmo
