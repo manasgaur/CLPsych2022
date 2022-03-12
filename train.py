@@ -10,9 +10,9 @@ from sklearn.metrics import classification_report,accuracy_score
 
 
 class Classifier:
-    def __init__(self,dataframe:pd.DataFrame)-> None:
+    def __init__(self,dataframe:pd.DataFrame,embedding_type, model_path=None)-> None:
         """Inititalize classifier."""
-        self.embeddings_model = modelEmbeddings('bert')
+        self.embeddings_model = modelEmbeddings(embedding_type,model_path)
         self.create_split(dataframe)
         
     def create_split(self,dataframe):
@@ -55,5 +55,5 @@ if __name__ == '__main__':
     import pandas as pd
     df = pd.read_csv('data/sample.csv')
     print(df.head())
-    classifier=Classifier(df)
+    classifier=Classifier(df,embedding_type= 'sentence_transformer',model_path ='sentence-transformers/stsb-roberta-large' )
     classifier.train_svm()
