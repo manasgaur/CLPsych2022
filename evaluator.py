@@ -1,7 +1,6 @@
 class evaluator(object):
     '''will calculate precision
-       , accuracy, recall, and
-       f1 measure
+       , accuracy, recall
     '''
 
     def __init__(self,model = None):
