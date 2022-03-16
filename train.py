@@ -14,6 +14,8 @@ class Classifier:
         """Inititalize classifier."""
         self.embeddings_model = modelEmbeddings(embedding_type,model_path)
         self.create_split(dataframe)
+        self.y_pred = None
+        self.y_test = None
         
     def create_split(self,dataframe):
         """Return train/test embeddings and class"""
@@ -46,8 +48,10 @@ class Classifier:
 
         self.svm_model = svm.SVC(kernel='linear', C=3).fit(X_train, y_train)
         y_pred = self.svm_model.predict(X_test)
-        print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,y_pred)*100,2)))
-        print(classification_report(y_test,y_pred))
+        self.y_pred = y_pred
+        self.y_test = y_test
+        #print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,y_pred)*100,2)))
+        #print(classification_report(y_test,y_pred))
 
         pickle.dump(self.svm_model,open('models/svm.pkl','wb'))
 
