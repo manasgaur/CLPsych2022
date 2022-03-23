@@ -55,8 +55,8 @@ class Classifier:
 
         self.svm_model = svm.SVC(kernel='linear', C=3).fit(X_train, y_train)
         y_pred = self.svm_model.predict(X_test)
-        print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,y_pred)*100,2)))
-        print(classification_report(y_test,y_pred))
+        #print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,y_pred)*100,2)))
+        #print(classification_report(y_test,y_pred))
 
         pickle.dump(self.svm_model,open('models/svm.pkl','wb'))
 
@@ -110,6 +110,7 @@ class BertClassifier:
         for ephoch in range(EPOCHS):
             train_fn( self.train_data_loader,self.model,optimizer,self.device,scheduler)
             outputs, targets = eval_fn(self.valid_data_loader,self.model,self.device)
+            #Change the accuracy calc below
             outputs = np.array(outputs)>=0.5
             accuracy = accuracy_score(targets, outputs)
             print(f"Accuracy Score = {accuracy} for Epoch = {ephoch} ")
