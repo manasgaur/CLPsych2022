@@ -7,12 +7,12 @@ class evaluator(object):
 
         #three classes 
         self.model = model
-        self.unique_classes = set(list(self.model.y_test))
-        self.c1_n = sum([item for item in list(self.model.y_test) if item == unique_classes[0]])
-        self.c2_n = sum([item for item in list(self.model.y_test) if item == unique_classes[1]])
-        self.c3_n = sum([item for item in list(self.model.y_test) if item == unique_classes[2]])
+        self.unique_classes = list(set(self.model.y_test))
+        self.c1_n = sum([1 for item in list(self.model.y_test) if item == self.unique_classes[0]])
+        self.c2_n = sum([1 for item in list(self.model.y_test) if item == self.unique_classes[1]])
+        self.c3_n = sum([1 for item in list(self.model.y_test) if item == self.unique_classes[2]])
         
-    def calculate_accuracy(self):
+    def accuracy(self):
         '''calculates TP+TN/(Total)
            averaged across all three unique classes
         '''
@@ -46,7 +46,7 @@ class evaluator(object):
 
         c3_accuracy = sum([y_pred[i]!=y_test[i] for i in range(n)])/float(n)
 
-        return (self.c1_n*c1+self.c2_n*c2+self.c3_n*c3)/float(n)
+        return (self.c1_n*c1_accuracy+self.c2_n*c2_accuracy+self.c3_n*c3_accuracy)/float(n)
         
 
     def precision(self):
@@ -65,7 +65,10 @@ class evaluator(object):
         tp = sum([y_pred[i] == 1 and y_test[i] == 1 for i in range(n)])
         fp = sum([y_pred[i] == 1 and y_test[i] == 0 for i in range(n)])
 
-        c1_p = tp/float(tp+fp)
+        if tp+fp ==0:
+            c1_p = 0
+        else:
+            c1_p = tp/float(tp+fp)
 
         #class 2 precision
         y_pred = list(self.model.y_pred)
@@ -76,8 +79,11 @@ class evaluator(object):
 
         tp = sum([y_pred[i] == 1 and y_test[i] == 1 for i in range(n)])
         fp = sum([y_pred[i] == 1 and y_test[i] == 0 for i in range(n)])
-
-        c2_p = tp/float(tp+fp)
+        
+        if tp+fp ==0:
+            c2_p = 0
+        else:
+            c2_p = tp/float(tp+fp)
 
         #class 3 precision
         y_pred = list(self.model.y_pred)
@@ -88,8 +94,11 @@ class evaluator(object):
 
         tp = sum([y_pred[i] == 1 and y_test[i] == 1 for i in range(n)])
         fp = sum([y_pred[i] == 1 and y_test[i] == 0 for i in range(n)])
-
-        c3_p = tp/float(tp+fp)
+        
+        if tp+fp ==0:
+            c3_p = 0
+        else:
+            c3_p = tp/float(tp+fp)
 
         return (self.c1_n*c1_p+self.c2_n*c2_p+self.c3_n*c3_p)/float(n)
         
@@ -110,8 +119,10 @@ class evaluator(object):
 
         tp = sum([y_pred[i] == 1 and y_test[i] == 1 for i in range(n)])
         fn = sum([y_pred[i] == 0 and y_test[i] == 1 for i in range(n)])
-
-        c1_r = tp/float(tp+fp)
+        if tp+fn ==0:
+            c1_r = 0
+        else:
+            c1_r = tp/float(tp+fn)
 
         #class 2 precision
         y_pred = list(self.model.y_pred)
@@ -121,9 +132,12 @@ class evaluator(object):
         n = len(y_test)
 
         tp = sum([y_pred[i] == 1 and y_test[i] == 1 for i in range(n)])
-        fp = sum([y_pred[i] == 0 and y_test[i] == 1 for i in range(n)])
+        fn = sum([y_pred[i] == 0 and y_test[i] == 1 for i in range(n)])
 
-        c2_r = tp/float(tp+fp)
+        if tp+fn ==0:
+            c2_r = 0
+        else:
+            c2_r = tp/float(tp+fn)
 
         #class 3 precision
         y_pred = list(self.model.y_pred)
@@ -133,9 +147,12 @@ class evaluator(object):
         n = len(y_test)
 
         tp = sum([y_pred[i] == 1 and y_test[i] == 1 for i in range(n)])
-        fp = sum([y_pred[i] == 0 and y_test[i] == 1 for i in range(n)])
-
-        c3_r = tp/float(tp+fp)
+        fn = sum([y_pred[i] == 0 and y_test[i] == 1 for i in range(n)])
+        
+        if tp+fn ==0:
+            c3_r = 0
+        else:
+            c3_r = tp/float(tp+fn)
 
         return (self.c1_n*c1_r+self.c2_n*c2_r+self.c3_n*c3_r)/float(n)
         
@@ -151,7 +168,7 @@ def main():
     print (eval.precision)
     print (eval.recall)
     print (eval.accuracy)
-    print (eval.f1_score)
+
 
 if __name__ == '__main__':
     main()

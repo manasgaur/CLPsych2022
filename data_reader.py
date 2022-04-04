@@ -21,7 +21,7 @@ def csv_reader(path: str) -> pd.DataFrame:
     df: pd.DataFrame
         dataframe containing timelines of a user.
     """
-    df = pd.read_csv(path, sep='\t')
+    df = pd.read_csv(path)
     df = process_data(df)
 
     return df

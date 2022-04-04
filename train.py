@@ -19,15 +19,16 @@ torch.zeros(1).cuda()
 
 
 class Classifier:
-    def __init__(self,dataframe:pd.DataFrame,embedding_type, model_path=None)-> None:
+    def __init__(self,dataframe:pd.DataFrame,embedding_type, vectorizer_path=None, saved_models_path = 'models/')-> None:
         """Inititalize classifier."""
-        self.embeddings_model = modelEmbeddings(embedding_type,model_path)
+        self.embeddings_model = modelEmbeddings(embedding_type,vectorizer_path)
+        self.saved_models_path = saved_models_path
         self.create_split(dataframe)
         
     def create_split(self,dataframe):
         """Return train/test embeddings and class"""
 
-        train_df,test_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.target.values)
+        train_df,test_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.Label.values)
         
         self.train_df = train_df
         self.test_df = test_df
@@ -42,7 +43,7 @@ class Classifier:
     def get_train_test_split(self):
         return self.x_train,self.x_test,self.y_train,self.y_test
     
-    def train_svm(self,)->None:
+    def train_predict(self,)->None:
         """Train model.
         
         Parameters
@@ -54,11 +55,16 @@ class Classifier:
         X_train, X_test, y_train, y_test = self.get_train_test_split()
 
         self.svm_model = svm.SVC(kernel='linear', C=3).fit(X_train, y_train)
-        y_pred = self.svm_model.predict(X_test)
-        #print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,y_pred)*100,2)))
-        #print(classification_report(y_test,y_pred))
+        self.y_pred = self.svm_model.predict(X_test)
+        save_loc = self.saved_models_path+'svm.pkl'
 
-        pickle.dump(self.svm_model,open('models/svm.pkl','wb'))
+        print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,self.y_pred)*100,2)))
+        print(classification_report(y_test,self.y_pred))
+
+        pickle.dump(self.svm_model,open(save_loc,'wb'))
+        print("Model saved at: {}".format(save_loc))
+
+
 
 class BertClassifier:
     def __init__(self,dataframe:pd.DataFrame,device='cuda',)-> None:
