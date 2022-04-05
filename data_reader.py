@@ -58,7 +58,7 @@ def csv_reader(path: str) -> pd.DataFrame:
     df: pd.DataFrame
         dataframe containing a single timeline.
     """
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, sep='\t')
     df = process_data(df)
 
     return df
