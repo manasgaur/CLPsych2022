@@ -15,7 +15,7 @@ from utils import TRAIN_BATCH_SIZE,EPOCHS
 import torch
 from bert_trainer import train_fn,eval_fn
 import torch
-torch.zeros(1).cuda()
+# torch.zeros(1).cuda()
 
 from data_reader import get_train_users
 
@@ -30,7 +30,7 @@ class Classifier:
     def create_split(self,dataframe):
         """Return train/test embeddings and class"""
 
-        train_df,test_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.Label.values)
+        train_df,test_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.label.values)
         
         self.train_df = train_df
         self.test_df = test_df
@@ -81,7 +81,7 @@ class BertClassifier:
     def create_split(self,dataframe):
         """Return train/test embeddings and class"""
 
-        train_df,dev_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.Label.values)
+        train_df,dev_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.label.values)
         
         self.train_df = train_df
         self.dev_df = dev_df
@@ -89,7 +89,7 @@ class BertClassifier:
         
         train_dataset = BertDataset(
                        text=self.train_df.text.values,
-                       target=self.train_df.Label.values)
+                       target=self.train_df.label.values)
         self.train_data_loader = torch.utils.data.DataLoader(train_dataset,
                                                         batch_size=TRAIN_BATCH_SIZE,
                                                         )
@@ -97,7 +97,7 @@ class BertClassifier:
 
         valid_dataset = BertDataset(
                             text= self.dev_df.text.values,
-                            target= self.dev_df.Label.values)
+                            target= self.dev_df.label.values)
         self.valid_data_loader = torch.utils.data.DataLoader(valid_dataset,
                                                         batch_size=TRAIN_BATCH_SIZE)
 
@@ -139,10 +139,12 @@ if __name__ == '__main__':
             dfs.append(tdf)
     df = pd.concat(dfs)
 
-    #df = pd.read_csv('data/sample.csv')
-    df['label'].replace({'0':1, 0:1, 'IE':2, 'IS':3},inplace=True)
-    classifier=Classifier(df,embedding_type= 'sentence_transformer',model_path ='sentence-transformers/stsb-roberta-large' )
-    classifier.train_svm()
+    df['content'] = df['content'].fillna(' ')
 
-    #classifier = BertClassifier(df)
-    #classifier.train()
+    df["label"].replace({"0": 1, 0: 1, "IE": 2, "IS": 3}, inplace=True)
+   
+    classifier = Classifier(df, embedding_type="glove")
+    classifier.train_predict()
+
+    classifier = BertClassifier(df)
+    classifier.train()
