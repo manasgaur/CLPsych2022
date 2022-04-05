@@ -8,8 +8,45 @@ from utils import TOKENIZER,TOKENS_MAX_LENGTH
 import torch
 import re
 import string
+import json
+
+from utils import FILE_train_users, FOLDER_train_data 
+
+
+def get_train_users() -> dict():
+    """
+    Read/process all training data for both tasks &
+    return a single dictionary with all of the data.
+    
+    Parameters
+    ----------
+    None
+        (Reading utils.FILE_train_users & 
+        utils.FOLDER_train_data)
+
+    Returns
+    -------
+    users: dict()
+        A dictionary with the following form:
+        userid -> 
+            {
+                timelines:  [list_of_timeline_ids (each being a str)],
+                data:       [list_of_timelines (each being pd.DataFrame)],
+                risk_level: label_for_task_b (single str)
+            }
+    """
+    users = json.load(open(FILE_train_users, 'rb'))
+    for user in users.keys():
+        users[user]['data'] = [csv_reader(FOLDER_train_data+str(tlid)+'.tsv') for tlid in users[user]['timelines']]
+        if users[user]['risk_level']=='No': #merging the "No Risk/"Low Risk" labels
+            users[user]['risk_level'] = 'Low'
+    return users
+
+
+
 def csv_reader(path: str) -> pd.DataFrame:
-    """Read & process TSV file.
+    """
+    Read & process  a single TSV file.
     
     Parameters
     ----------
@@ -19,7 +56,7 @@ def csv_reader(path: str) -> pd.DataFrame:
     Returns
     -------
     df: pd.DataFrame
-        dataframe containing timelines of a user.
+        dataframe containing a single timeline.
     """
     df = pd.read_csv(path, sep='\t')
     df = process_data(df)

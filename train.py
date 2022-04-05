@@ -17,6 +17,8 @@ from bert_trainer import train_fn,eval_fn
 import torch
 torch.zeros(1).cuda()
 
+from data_reader import get_train_users
+
 
 class Classifier:
     def __init__(self,dataframe:pd.DataFrame,embedding_type, model_path=None)-> None:
@@ -31,11 +33,11 @@ class Classifier:
         
         self.train_df = train_df
         self.test_df = test_df
-        self.x_train = self.embeddings_model(train_df['text'].values)
-        self.y_train = train_df['Label']
+        self.x_train = self.embeddings_model(train_df['content'].values)
+        self.y_train = train_df['label']
         
-        self.x_test = self.embeddings_model(test_df['text'].values)
-        self.y_test = test_df['Label']
+        self.x_test = self.embeddings_model(test_df['content'].values)
+        self.y_test = test_df['label']
 
         
 
@@ -120,11 +122,21 @@ class BertClassifier:
 
 if __name__ == '__main__':
     import pandas as pd
-    df = pd.read_csv('data/sample.csv')
-    df['Label'].replace({'IE':1,'O':2,'IS':3},inplace=True)
-    print(df.head())
-    # classifier=Classifier(df,embedding_type= 'sentence_transformer',model_path ='sentence-transformers/stsb-roberta-large' )
-    # classifier.train_svm()
 
-    classifier = BertClassifier(df)
-    classifier.train()
+    #
+    users = get_train_users()
+    dfs = []
+    for user in users.keys():
+        for i in range(len(users[user]['data'])):
+            tdf = users[user]['data'][i]
+            tdf['timeline_id'] = users[user]['timelines'][i]
+            dfs.append(tdf)
+    df = pd.concat(dfs)
+
+    #df = pd.read_csv('data/sample.csv')
+    df['label'].replace({'0':1, 0:1, 'IE':2, 'IS':3},inplace=True)
+    classifier=Classifier(df,embedding_type= 'sentence_transformer',model_path ='sentence-transformers/stsb-roberta-large' )
+    classifier.train_svm()
+
+    #classifier = BertClassifier(df)
+    #classifier.train()

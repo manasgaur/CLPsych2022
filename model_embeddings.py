@@ -8,6 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle
 from glove_vector import GloVe
 import numpy as np
+
+from data_reader import get_train_users
 transformer_models = ['bert-base-uncased',
           'sentence-transformers/stsb-roberta-large',
 ]
@@ -73,8 +75,21 @@ class modelEmbeddings:
 
 if __name__ == '__main__':
     import pandas as pd
-    df = pd.read_csv('data/sample.csv')
+
+    # Loading the data and merging into a large pd.DataFrame
+    users = get_train_users()
+    dfs = []
+    for user in users.keys():
+        for i in range(len(users[user]['data'])):
+            tdf = users[user]['data'][i]
+            tdf.title = tdf.title.fillna(' ')
+            tdf.content = tdf.content.fillna(' ')
+            tdf['timeline_id'] = users[user]['timelines'][i]
+            dfs.append(tdf)
+    df = pd.concat(dfs)
+
+    #df = pd.read_csv('data/sample.csv')
     model_embeddings = modelEmbeddings('glove')
-    embeddings = model_embeddings(df['text'])
+    embeddings = model_embeddings(df['content'])
     print(embeddings)
 

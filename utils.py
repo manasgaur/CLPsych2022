@@ -1,5 +1,8 @@
 import transformers
 
+FILE_train_users = '/home/adtsakal/Projects/clpsych_datasets_generation/final_dataset/train_users.json'
+FOLDER_train_data = '/home/adtsakal/Projects/clpsych_datasets_generation/final_dataset/train/'
+
 TOKENS_MAX_LENGTH = 128
 TRAIN_BATCH_SIZE = 32
 TEST_BATCH_SIZE = 4
