@@ -43,7 +43,6 @@ def get_train_users() -> dict():
     return users
 
 
-
 def csv_reader(path: str) -> pd.DataFrame:
     """
     Read & process  a single TSV file.
@@ -63,6 +62,7 @@ def csv_reader(path: str) -> pd.DataFrame:
 
     return df
 
+
 def process_data(df: pd.DataFrame) -> pd.DataFrame:
     """Process input dataframe.
 
@@ -78,7 +78,8 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     # Processing commands
     # --------------
-
+    #df['content'] = df['content'].fillna(' ')
+    #df['title'] = df['title'].fillna(' ')
     # ---------------
     return df
 

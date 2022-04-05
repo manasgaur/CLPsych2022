@@ -2,17 +2,17 @@ import numpy as np
 
 '''
 This script contains three sets of evaluation functions:
-    (a) post-level precision/recall/f1 scores that are calculated by merging the
-        actual/predicted labels across all timelines:
-            precision = get_precision_score(actual, predicted, LABEL)
-            recall = get_recall_score(actual, predicted, LABEL)
-            f1_score = get_f1_score(actual, predicted, LABEL)
+    (a) post-level eval scores that are calculated by merging the actual/predicted labels across all timelines:
+            > precision = get_precision_score(actual, predicted, LABEL)
+            > recall = get_recall_score(actual, predicted, LABEL)
+            > f1_score = get_f1_score(actual, predicted, LABEL)
     
-    (b) timeline-level, window-based precision and recall scores:
-            precision_w, recall_w = get_timeline_level_precision_recall(actual, predicted, WINDOW, LABEL)
+    (b) timeline-level, window-based precision and recall scores (run on each timeline independently!):
+            > precision_w, recall_w = get_timeline_level_precision_recall(actual, predicted, WINDOW, LABEL)
     
-    (c) timeline-level coverage-based precision/recall scores:
-
+    (c) timeline-level, coverage-based precision/recall scores (run on each timeline independently!):
+            > cov_recall = get_coverage_recall(actual, predicted, LABEL)
+            > cor_precision = get_coverage_precision(actual, predicted, LABEL)
 '''
 
 
@@ -102,12 +102,31 @@ def get_f1_score(actual, predicted, cls='IS'):
 
 '''(b) The window-based, timeline-level Precision and Recall script'''
 def get_timeline_level_precision_recall(actual, predicted, window=1, cls='IS'):
-    '''
-    Given the lists of predicted and actual labels, the label to calculate the metrics for and
-    the window to use (allowing +-window predictions to be considered as accurate), it returns:
-        (a) the precision using that window for the specified label
-        (b) the recall -//-
-    '''
+    """
+        Given the lists of (ORDERED!) predicted and actual labels of a SINGLE timeline, 
+        the label to calculate the  metrics for and the window to use (allowing 
+        +-window predictions to be considered as accurate), it returns:
+            (a) the precision using that window for the specified label
+            (b) the recall -//-
+    
+    Parameters
+    ----------
+    actual: list
+        list of actual labels (ORDERED) in a single timeline (one per post)
+    predicted: list
+        list of actual labels (ORDERED) in a single timeline (one per post)
+    window: int
+        the window size to consider (you can play around with increasing/decreasing)
+    cls:
+        the label we are after (0/IS/IE)
+
+    Returns
+    -------
+    precision: float
+        the final window-based precision score for the specified label in this timeline
+    recall: float
+        the final window-based recall score for the specified label in this timeline
+    """
     assert len(actual)==len(predicted)
     if (len(actual)>125) or (len(actual)<10):
         print('This function should be run at the timeline-level (i.e., not by merging all actual/predicitons together)!')
@@ -135,8 +154,28 @@ def get_timeline_level_precision_recall(actual, predicted, window=1, cls='IS'):
     return precision, recall
 
 
-'''The coverage scripts'''
+'''(c) The coverage scripts'''
 def get_coverage_recall(actual, predicted, cls='IS'):
+    """
+        Given the lists of (ORDERED!) predicted and actual labels of a SINGLE timeline, 
+        the label to calculate the  metrics for and the window to use (allowing 
+        +-window predictions to be considered as accurate), it returns the recall-oriented
+        coverage for that particular timeline
+    
+    Parameters
+    ----------
+    actual: list
+        list of actual labels (ORDERED) in a single timeline (one per post)
+    predicted: list
+        list of actual labels (ORDERED) in a single timeline (one per post)
+    cls:
+        the label we are after (0/IS/IE)
+
+    Returns
+    -------
+    coverage_recall: float
+        the final coverage-based recall score for the specified label in this timeline
+    """
     assert len(actual)==len(predicted)
     if (len(actual)>125) or (len(actual)<10):
         print('This function should be run at the timeline-level (i.e., not by merging all actual/predicitons together)!')
@@ -167,6 +206,26 @@ def get_coverage_recall(actual, predicted, cls='IS'):
 
 
 def get_coverage_precision(actual, predicted, cls='IS'):
+    """
+        Given the lists of (ORDERED!) predicted and actual labels of a SINGLE timeline, 
+        the label to calculate the  metrics for and the window to use (allowing 
+        +-window predictions to be considered as accurate), it returns the precision-oriented
+        coverage for that particular timeline
+    
+    Parameters
+    ----------
+    actual: list
+        list of actual labels (ORDERED) in a single timeline (one per post)
+    predicted: list
+        list of actual labels (ORDERED) in a single timeline (one per post)
+    cls:
+        the label we are after (0/IS/IE)
+
+    Returns
+    -------
+    coverage_precision: float
+        the final coverage-based precision score for the specified label in this timeline
+    """
     assert len(actual)==len(predicted)
     if (len(actual)>125) or (len(actual)<10):
         print('This function should be run at the timeline-level (i.e., not by merging all actual/predicitons together)!')
