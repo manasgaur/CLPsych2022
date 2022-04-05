@@ -14,3 +14,56 @@
     * Label : ['IS', 'IE', 'O']
     * text : Post made a user at particular instance of time.
 * While assessing the baseline models, we are specifically interested in 'IS' and 'IE' labels.
+
+## Usage
+### Loading dataset
+You can simply load dataset by inputing file name.
+```
+dataset = csv_reader("data/sample.csv")
+```
+### Create embeddings
+Select embeddings model type
+```
+from model_embeddings import modelEmbeddings
+embeddings_model = modelEmbeddings(model_type = `glove')
+embeddings = embeddings_model(documents)
+```
+Here `model_type` can take following values
+  * `glove` : Glove embeddings
+  * `tfidf` : tf-idf vectorizer
+  * `sentence_transformer` : bert-base-uncased pre-trained embeddings
+ 
+Loading pre-trained embeddings
+```
+from model_embeddings import modelEmbeddings
+embeddings_model = modelEmbeddings(model_type = `tfidf',load_path='models/tfidf_vectorizer.pkl')
+embeddings = embeddings_model(documents)
+```
+
+Saving trained model to custom location
+```
+from model_embeddings import modelEmbeddings
+embeddings_model = modelEmbeddings(model_type = `tfidf',save_path='models/tfidf_vectorizer.pkl')
+embeddings = embeddings_model(documents)
+```
+
+### Training
+Train basic SVM classifier and save trained model to custom location
+```
+dataset = csv_reader("data/sample.csv")
+from data_reader import csv_reader
+from train import Classifier
+dataset = csv_reader("data/sample.csv")
+classifier = Classifier(dataframe=dataset,embedding_type='glove',train_vectorizre = False, save_dir='models/')
+classifier.train_predict()
+```
+
+### Evaluation
+Evaluate trained model using evaluator
+```
+from evaluator import evaluator
+eval = evaluator(classifier)
+print (eval.precision())
+print (eval.recall())
+print (eval.accuracy())
+```

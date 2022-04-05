@@ -1,4 +1,5 @@
 """Create contextualized word embeddings."""
+from json import load
 from statistics import mode
 from typing import List,Any
 
@@ -15,7 +16,7 @@ transformer_models = ['bert-base-uncased',
 ]
 
 class modelEmbeddings:
-    def __init__(self, model_type:str = 'bert', load_direct= False)-> None:
+    def __init__(self, model_type:str = 'bert', save_path ='models/', load_path = None)-> None:
         """Inititalize model embeddings.
         
         Parameters
@@ -23,9 +24,14 @@ class modelEmbeddings:
         model_type: str
             Type of transformer model to use
             Options: bert, roberta, elmo
+        save_path: str
+            save location of embeddings model
+        load_path: str
+            location of pre-trained embeddings model
         """
         self.model_type = model_type
-        self.load_direct = load_direct
+        self.save_path = save_path
+        self.load_path = load_path
 
     def get_tfidf_embeddings(self, documents: List[str],save_path='models/'):
         vectorizer = TfidfVectorizer()
@@ -34,13 +40,13 @@ class modelEmbeddings:
         print("TF-IDF vectorizer saved at : models/tfidf_vectorizer.pkl")
         return embeddings
 
-    def get_tfidf_embeddings_pre_trained(self,documents: List[str],model_path):
-        vectorizer = pickle.load(open(model_path,'rb'))
+    def get_tfidf_embeddings_pre_trained(self,documents: List[str],load_path):
+        vectorizer = pickle.load(open(load_path,'rb'))
         embeddings = vectorizer.transform(documents)
 
         return embeddings
 
-    def __call__(self, documents: List[str],model_path = None) -> Any:
+    def __call__(self, documents: List[str]) -> Any:
         """Output contextualized word embeddings.
 
         Parameters
@@ -54,15 +60,15 @@ class modelEmbeddings:
             Word embeddings
         """
         if self.model_type =='tfidf':
-            if model_path is None:
-                embeddings = self.get_tfidf_embeddings(documents)
+            if self.load_path is None:
+                embeddings = self.get_tfidf_embeddings(documents,save_path=self.save_path)
             else:
-                embeddings = self.get_tfidf_embeddings_pre_trained(documents,model_path=model_path)
+                embeddings = self.get_tfidf_embeddings_pre_trained(documents,load_path=self.load_path)
         elif self.model_type == 'sentence_transformer':
-            if model_path is None:
+            if self.load_path is None:
                 model = SentenceTransformer('bert-base-uncased')
             else:
-                model = SentenceTransformer(model_path)
+                model = SentenceTransformer(self.load_path)
             embeddings = model.encode(documents)
         elif self.model_type == 'glove':
             glove_obj = GloVe()

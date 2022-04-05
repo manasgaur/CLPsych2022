@@ -16,15 +16,17 @@ import torch
 from bert_trainer import train_fn,eval_fn
 import torch
 torch.zeros(1).cuda()
-
 from data_reader import get_train_users
 
-
 class Classifier:
-    def __init__(self,dataframe:pd.DataFrame,embedding_type, vectorizer_path=None, saved_models_path = 'models/')-> None:
+    def __init__(self,dataframe:pd.DataFrame,embeddings_model_type, vectorizer_path=None, train_vectorizre= True, save_dir = 'models/')-> None:
         """Inititalize classifier."""
-        self.embeddings_model = modelEmbeddings(embedding_type,vectorizer_path)
-        self.saved_models_path = saved_models_path
+        if train_vectorizre:
+            self.embeddings_model = modelEmbeddings(embeddings_model_type)
+        else:
+           self.embeddings_model =  modelEmbeddings(embeddings_model_type,save_path=save_dir)
+        self.custom_vectorizer_path = vectorizer_path
+        self.saved_models_path = save_dir
         self.create_split(dataframe)
         
     def create_split(self,dataframe):
@@ -58,7 +60,7 @@ class Classifier:
 
         self.svm_model = svm.SVC(kernel='linear', C=3).fit(X_train, y_train)
         self.y_pred = self.svm_model.predict(X_test)
-        save_loc = self.saved_models_path+'svm.pkl'
+        save_loc = self.save_dir+'svm.pkl'
 
         print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,self.y_pred)*100,2)))
         print(classification_report(y_test,self.y_pred))
@@ -66,7 +68,7 @@ class Classifier:
         pickle.dump(self.svm_model,open(save_loc,'wb'))
         print("Model saved at: {}".format(save_loc))
 
-
+        
 
 class BertClassifier:
     def __init__(self,dataframe:pd.DataFrame,device='cuda',)-> None:
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 
     #df = pd.read_csv('data/sample.csv')
     df['label'].replace({'0':1, 0:1, 'IE':2, 'IS':3},inplace=True)
-    classifier=Classifier(df,embedding_type= 'sentence_transformer',model_path ='sentence-transformers/stsb-roberta-large' )
+    classifier=Classifier(df,embeddings_model_type= 'sentence_transformer',vectorizer_path ='sentence-transformers/stsb-roberta-large' )
     classifier.train_svm()
 
     #classifier = BertClassifier(df)
