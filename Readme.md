@@ -32,7 +32,8 @@ embeddings = embeddings_model(documents)
 Here `model_type` can take following values
   * `glove` : Glove embeddings
   * `tfidf` : tf-idf vectorizer
-  * `sentence_transformer` : bert-base-uncased pre-trained embeddings
+  * `sentence_transformer` : bert-base-uncased pre-trained embeddings; stsb-roberta-large (https://huggingface.co/sentence-transformers/stsb-roberta-large)
+  *  Loction for other complex `model_type`'s that can be used: https://huggingface.co/sentence-transformers/
 
 There is a subtle difference tf-idf and embedding models lies in the engineered features. TF-IDF is like bag of words, discrete, whereas embedding models are continous semantic representation of words or sentences. Best way to select the `model_type` is by computing the similarity between words. Project this similarity into T-SNE or heatmap to analyze which `model_type`'s word similarity scores are sensible, intuitively.
  
