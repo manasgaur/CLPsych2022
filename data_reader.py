@@ -86,7 +86,7 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
 
 class BertDataset:
     def __init__(self,text,target):
-        self.tweet = text
+        self.txt = text
         self.target = target
 #         self.keyword = keyword
 #         self.location = location
@@ -96,12 +96,12 @@ class BertDataset:
         return len(self.tweet)
     
     def __getitem__(self,item):
-        tweet = re.sub(r'http\S+', '', self.tweet[item]) ###removes URL from tweets
-        tweet = " ".join(str(tweet).split())
+        txt = re.sub(r'http\S+', '', self.txt[item]) ###removes URL from tweets
+        txt = " ".join(str(txt).split())
         
         
         inputs = self.tokenizer.encode_plus(
-            tweet,
+            txt,
             None,
             add_special_tokens=True,
             max_length=self.max_len,
