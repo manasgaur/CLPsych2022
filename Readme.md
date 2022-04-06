@@ -22,16 +22,19 @@ You can simply load dataset by inputing file name.
 dataset = csv_reader("data/sample.csv")
 ```
 ### Create embeddings
-Select embeddings model type
+Select embeddings model type. In this repository, we provide three ways to define numerical embeddings of the textual data. (a) TF-IDF, (b) Sentence Transformer, and (c) GLoVE. You can use either of these incorporated embedding methods or introduce your own by adding another if-else block inside the __call__ function. For instance, BERT embeddings can be used as described in from; https://mccormickml.com/2019/05/14/BERT-word-embeddings-tutorial/ . 
 ```
 from model_embeddings import modelEmbeddings
 embeddings_model = modelEmbeddings(model_type = `glove')
 embeddings = embeddings_model(documents)
 ```
+
 Here `model_type` can take following values
   * `glove` : Glove embeddings
   * `tfidf` : tf-idf vectorizer
   * `sentence_transformer` : bert-base-uncased pre-trained embeddings
+
+There is a subtle difference tf-idf and embedding models lies in the engineered features. TF-IDF is like bag of words, discrete, whereas embedding models are continous semantic representation of words or sentences. Best way to select the `model_type` is by computing the similarity between words. Project this similarity into T-SNE or heatmap to analyze which `model_type`'s word similarity scores are sensible, intuitively.
  
 Loading pre-trained embeddings
 ```
