@@ -35,14 +35,14 @@ class modelEmbeddings:
 
     def get_tfidf_embeddings(self, documents: List[str],save_path='models/'):
         vectorizer = TfidfVectorizer()
-        embeddings = vectorizer.fit_transform(documents)
+        embeddings = vectorizer.fit_transform(documents) # fit_transform while training data
         pickle.dump(vectorizer,open(save_path+'tfidf_vectorizer.pkl','wb'))
         print("TF-IDF vectorizer saved at : models/tfidf_vectorizer.pkl")
         return embeddings
 
     def get_tfidf_embeddings_pre_trained(self,documents: List[str],load_path):
         vectorizer = pickle.load(open(load_path,'rb'))
-        embeddings = vectorizer.transform(documents)
+        embeddings = vectorizer.transform(documents) #For test data use transform.
 
         return embeddings
 
