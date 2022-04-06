@@ -1,3 +1,5 @@
+This repository would store all your pre-trained or fine-tuned embedding models. Also, we suggest storing your trained models here (.pkl (pickle), .npy (numpy), .hd5 are good methods to store trained models.)
+
 There are the two sources from where you can download the GLoVE Embeddings:
 * https://nlp.stanford.edu/projects/glove/
 * https://github.com/stanfordnlp/GloVe
