@@ -8,8 +8,8 @@ from evaluator import evaluator
 if __name__ == "__main__":
     dataset = csv_reader("data/sample.csv")
 
-    classifier = Classifier(dataframe=dataset,embeddings_model_type='sentence_transformer',vectorizer_path = None)
-    classifier.train_predict()
+    classifier, = Classifier(dataframe=dataset,embeddings_model_type='sentence_transformer',vectorizer_path = None)
+    model_path = classifier.train_predict()
     eval = evaluator(classifier)
     print (eval.precision())
     print (eval.recall())
