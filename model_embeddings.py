@@ -15,7 +15,7 @@ transformer_models = ['bert-base-uncased',
 ]
 
 class modelEmbeddings:
-    def __init__(self, model_type:str = 'bert')-> None:
+    def __init__(self, model_type:str = 'tfidf')-> None:
         """Inititalize model embeddings.
         
         Parameters
@@ -93,6 +93,7 @@ class modelEmbeddings:
         self.vectorizer_path: str
             Path to trained model
         """
+        documents = list(documents)
         if self.model_type =='tfidf':
             if load_path is None:
                 embeddings = self.get_tfidf_embeddings(documents,save_path=save_path)
@@ -115,8 +116,8 @@ class modelEmbeddings:
 
 if __name__ == '__main__':
     import pandas as pd
-    df = pd.read_csv('data/sample.csv')
-    model_embeddings = modelEmbeddings('tfidf',)
-    embeddings = model_embeddings(df['text'])
+    df = pd.read_csv('data/test.csv')
+    model_embeddings = modelEmbeddings('sentence_transformer')
+    embeddings = model_embeddings(df['content'])
     print(embeddings)
 
