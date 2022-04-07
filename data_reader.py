@@ -77,12 +77,12 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
         processed dataframe
     """
     # Keep str values and fill none values
+    if 'title' not in df.columns:
+        df['title'] = None
     df['content'] = df['content'].fillna(' ')
     df['title'] = df['title'].fillna(' ')
     df = df[df['title'].apply(lambda x: True if type(x)==str else False)]
     df = df[df['content'].apply(lambda x: True if type(x)==str else False)]
-
-    df = df.dropna(subset=['label'])
     return df
 
 

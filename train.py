@@ -19,7 +19,7 @@ torch.zeros(1).cuda()
 from data_reader import get_train_users
 
 class Classifier:
-    def __init__(self, dataframe:pd.DataFrame, embeddings_model_type: str, vectorizer_path: Optional[str] = None, save_dir: str = 'models/') -> None:
+    def __init__(self, dataframe:pd.DataFrame, embeddings_model_type: str, vectorizer_path: Optional[str] = None, save_dir: str = 'models/',eval=False) -> None:
         """Inititalize classifier.
         
         Parameters
@@ -36,8 +36,10 @@ class Classifier:
         self.embeddings_model = modelEmbeddings(embeddings_model_type)
         self.vectorizer_path = vectorizer_path
         self.saved_models_path = save_dir
-        self.create_split(dataframe)
-        
+        self.dataframe =dataframe
+        if not eval:
+            self.create_split(self.dataframe)
+
     def create_split(self, dataframe:pd.DataFrame) -> None:
         """Return train/test embeddings and class
         
@@ -80,6 +82,30 @@ class Classifier:
         print("Model saved at: {}".format(save_loc))
 
         
+    def predict(self,model_path: str)-> None:
+        """Predict using trained model.
+        
+        Parameters
+        ----------
+        model_path: str
+            Save directory for ML models.
+        
+        Returns
+        -------
+        pred_list: List[str]
+            List of predicted labels
+        test_list: List[str]
+            List of true labels if any
+        """
+        embeddings,_ = self.embeddings_model(self.dataframe['content'])
+        classifier = pickle.load(open(model_path,'rb'))
+        pred_list = classifier.predict(embeddings)
+        if 'label' in self.dataframe:
+            test_list = self.dataframe['label']
+        else:
+            test_list = None
+        return pred_list,test_list
+
 
 class BertClassifier:
     def __init__(self,dataframe:pd.DataFrame,device='cuda',)-> None:
