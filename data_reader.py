@@ -76,11 +76,11 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
     df: pd.DataFrame
         processed dataframe
     """
-    # Processing commands
-    # --------------
-    #df['content'] = df['content'].fillna(' ')
-    #df['title'] = df['title'].fillna(' ')
-    # ---------------
+    df = df[df['title'].apply(lambda x: True if type(x)==str else False)]
+    df = df[df['content'].apply(lambda x: True if type(x)==str else False)]
+    df['content'] = df['content'].fillna(' ')
+    df['title'] = df['title'].fillna(' ')
+    df = df.dropna(subset=['label'])
     return df
 
 
