@@ -1,5 +1,5 @@
 """Train machine learning classifier."""
-from typing import Any, List
+from typing import Any, List,Optional
 import pickle
 import numpy as np
 from model_embeddings import modelEmbeddings
@@ -19,48 +19,59 @@ torch.zeros(1).cuda()
 from data_reader import get_train_users
 
 class Classifier:
-    def __init__(self,dataframe:pd.DataFrame,embeddings_model_type, vectorizer_path=None, train_vectorizre= True, save_dir = 'models/')-> None:
-        """Inititalize classifier."""
-        if train_vectorizre:
-            self.embeddings_model = modelEmbeddings(embeddings_model_type)
-        else:
-           self.embeddings_model =  modelEmbeddings(embeddings_model_type,save_path=save_dir)
-        self.custom_vectorizer_path = vectorizer_path
-        self.saved_models_path = save_dir
-        self.create_split(dataframe)
-        
-    def create_split(self,dataframe):
-        """Return train/test embeddings and class"""
-
-        train_df,test_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe.Label.values)
-        
-        self.train_df = train_df
-        self.test_df = test_df
-        self.x_train = self.embeddings_model(train_df['content'].values)
-        self.y_train = train_df['label']
-        
-        self.x_test = self.embeddings_model(test_df['content'].values)
-        self.y_test = test_df['label']
-
-        
-
-    def get_train_test_split(self):
-        return self.x_train,self.x_test,self.y_train,self.y_test
-    
-    def train_predict(self,)->None:
-        """Train model.
+    def __init__(self, dataframe:pd.DataFrame, embeddings_model_type: str, vectorizer_path: Optional[str] = None, save_dir: str = 'models/') -> None:
+        """Inititalize classifier.
         
         Parameters
         ----------
-        model: Any
-
+        dataframe: pd.DataFrame
+            dataset
+        embeddings_model_type: str
+            type of embeddings. e.g glove/tfidf/sentence_transformers
+        vectorizer_path: Optional[str]
+            Path to pre-trained vectors/ transformer model.
+        save_dir: str
+            Save directory for ML models.
         """
+        self.embeddings_model = modelEmbeddings(embeddings_model_type)
+        self.vectorizer_path = vectorizer_path
+        self.saved_models_path = save_dir
+        self.create_split(dataframe)
         
+    def create_split(self, dataframe:pd.DataFrame) -> None:
+        """Return train/test embeddings and class
+        
+        Parameters
+        ----------
+        dataframe: pd.DataFrame
+            dataset
+        """
+        train_df,test_df = train_test_split(dataframe,test_size=0.1,random_state=42, stratify=dataframe['label'].values)
+        
+        self.train_df = train_df
+        self.test_df = test_df
+
+        self.y_train = train_df['label']
+        self.y_test = test_df['label']
+
+        if not self.vectorizer_path:
+            self.x_train,self.vectorizer_path = self.embeddings_model(train_df['content'].values,save_path=self.saved_models_path)
+        else:
+            self.x_train,self.vectorizer_path = self.embeddings_model(train_df['content'].values,load_path=self.vectorizer_path)
+        
+        self.x_test,self.vectorizer_path = self.embeddings_model(test_df['content'].values, load_path = self.vectorizer_path)
+
+    def get_train_test_split(self) -> Any:
+        """Return data split."""
+        return self.x_train,self.x_test,self.y_train,self.y_test
+    
+    def train_predict(self,)->None:
+        """Train and save model."""
         X_train, X_test, y_train, y_test = self.get_train_test_split()
 
         self.svm_model = svm.SVC(kernel='linear', C=3).fit(X_train, y_train)
         self.y_pred = self.svm_model.predict(X_test)
-        save_loc = self.save_dir+'svm.pkl'
+        save_loc = self.saved_models_path+'svm.pkl'
 
         print('Accuracy: SVM model = '+str(round(accuracy_score(y_test,self.y_pred)*100,2)))
         print(classification_report(y_test,self.y_pred))
@@ -91,7 +102,7 @@ class BertClassifier:
         
         train_dataset = BertDataset(
                        text=self.train_df.text.values,
-                       target=self.train_df.Label.values)
+                       target=self.train_df.label.values)
         self.train_data_loader = torch.utils.data.DataLoader(train_dataset,
                                                         batch_size=TRAIN_BATCH_SIZE,
                                                         )
@@ -99,7 +110,7 @@ class BertClassifier:
 
         valid_dataset = BertDataset(
                             text= self.dev_df.text.values,
-                            target= self.dev_df.Label.values)
+                            target= self.dev_df.label.values)
         self.valid_data_loader = torch.utils.data.DataLoader(valid_dataset,
                                                         batch_size=TRAIN_BATCH_SIZE)
 

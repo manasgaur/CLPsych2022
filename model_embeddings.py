@@ -9,14 +9,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle
 from glove_vector import GloVe
 import numpy as np
-
-from data_reader import get_train_users
+from scipy import sparse
 transformer_models = ['bert-base-uncased',
           'sentence-transformers/stsb-roberta-large',
 ]
 
 class modelEmbeddings:
-    def __init__(self, model_type:str = 'bert', save_path ='models/', load_path = None)-> None:
+    def __init__(self, model_type:str = 'bert')-> None:
         """Inititalize model embeddings.
         
         Parameters
@@ -30,45 +29,80 @@ class modelEmbeddings:
             location of pre-trained embeddings model
         """
         self.model_type = model_type
-        self.save_path = save_path
-        self.load_path = load_path
+        self.vectorizer_path = None
 
-    def get_tfidf_embeddings(self, documents: List[str],save_path='models/'):
+    def get_tfidf_embeddings(self, documents: List[str], save_path: str)->sparse:
+        """Train tf-idf vectorizer.
+       
+        Parameters
+        ----------
+        documents: List[str]
+            List of text documents
+        save_path: str
+            saving path to tf-idf vectorizer
+
+        Returns
+        -------
+        embeddings: sprase
+            Sparse matrix containing tf-idf vectors
+        """
         vectorizer = TfidfVectorizer()
-        embeddings = vectorizer.fit_transform(documents) # fit_transform while training data
-        pickle.dump(vectorizer,open(save_path+'tfidf_vectorizer.pkl','wb'))
+        embeddings = vectorizer.fit_transform(documents)
+        self.vectorizer_path = save_path+'tfidf_vectorizer.pkl'
+
+        pickle.dump(vectorizer,open(self.vectorizer_path,'wb'))
         print("TF-IDF vectorizer saved at : models/tfidf_vectorizer.pkl")
         return embeddings
 
-    def get_tfidf_embeddings_pre_trained(self,documents: List[str],load_path):
+    def get_tfidf_embeddings_pre_trained(self, documents: List[str], load_path: str)->sparse:
+        """Use pre-trained vectorizer.
+        
+        Parameters
+        ----------
+        documents: List[str]
+            List of text documents
+        load_path: str
+            path to pre-trained tf-idf vectorizer
+
+        Returns
+        -------
+        embeddings: sprase
+            Sparse matrix containing tf-idf vectors
+        """
         vectorizer = pickle.load(open(load_path,'rb'))
-        embeddings = vectorizer.transform(documents) #For test data use transform.
+        embeddings = vectorizer.transform(documents)
 
         return embeddings
 
-    def __call__(self, documents: List[str]) -> Any:
+    def __call__(self, documents: List[str], load_path = None, save_path = 'models/') -> Any:
         """Output contextualized word embeddings.
 
         Parameters
         ----------
         documents: List[str]
             text to create embeddings
+        load_path: str
+            path to pre-trained tf-idf vectorizer 
+        save_path: str
+            saving path to tf-idf vectorizer
         
         Returns
         -------
-        embeddings: torch.Tensor
+        embeddings: Any
             Word embeddings
+        self.vectorizer_path: str
+            Path to trained model
         """
         if self.model_type =='tfidf':
-            if self.load_path is None:
-                embeddings = self.get_tfidf_embeddings(documents,save_path=self.save_path)
+            if load_path is None:
+                embeddings = self.get_tfidf_embeddings(documents,save_path=save_path)
             else:
-                embeddings = self.get_tfidf_embeddings_pre_trained(documents,load_path=self.load_path)
+                embeddings = self.get_tfidf_embeddings_pre_trained(documents,load_path=load_path)
         elif self.model_type == 'sentence_transformer':
-            if self.load_path is None:
+            if load_path is None:
                 model = SentenceTransformer('bert-base-uncased')
             else:
-                model = SentenceTransformer(self.load_path)
+                model = SentenceTransformer(load_path)
             embeddings = model.encode(documents)
         elif self.model_type == 'glove':
             glove_obj = GloVe()
@@ -76,26 +110,13 @@ class modelEmbeddings:
         else:
             embeddings = None
             
-        return embeddings
+        return embeddings, self.vectorizer_path
 
 
 if __name__ == '__main__':
     import pandas as pd
-
-    # Loading the data and merging into a large pd.DataFrame
-    users = get_train_users()
-    dfs = []
-    for user in users.keys():
-        for i in range(len(users[user]['data'])):
-            tdf = users[user]['data'][i]
-            tdf.title = tdf.title.fillna(' ')
-            tdf.content = tdf.content.fillna(' ')
-            tdf['timeline_id'] = users[user]['timelines'][i]
-            dfs.append(tdf)
-    df = pd.concat(dfs)
-
-    #df = pd.read_csv('data/sample.csv')
-    model_embeddings = modelEmbeddings('glove')
-    embeddings = model_embeddings(df['content'])
+    df = pd.read_csv('data/sample.csv')
+    model_embeddings = modelEmbeddings('tfidf',)
+    embeddings = model_embeddings(df['text'])
     print(embeddings)
 
