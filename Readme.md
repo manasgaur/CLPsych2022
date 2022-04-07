@@ -40,15 +40,15 @@ There is a subtle difference tf-idf and embedding models lies in the engineered 
 Loading pre-trained embeddings
 ```
 from model_embeddings import modelEmbeddings
-embeddings_model = modelEmbeddings(model_type = `tfidf',load_path='models/tfidf_vectorizer.pkl')
-embeddings = embeddings_model(documents)
+embeddings_model = modelEmbeddings(model_type = `tfidf')
+embeddings = embeddings_model(documents,load_path='models/tfidf_vectorizer.pkl')
 ```
 
 Saving trained model to custom location
 ```
 from model_embeddings import modelEmbeddings
-embeddings_model = modelEmbeddings(model_type = `tfidf',save_path='models/tfidf_vectorizer.pkl')
-embeddings = embeddings_model(documents)
+embeddings_model = modelEmbeddings(model_type = `tfidf')
+embeddings = embeddings_model(documents,save_path='models/tfidf_vectorizer.pkl')
 ```
 
 ### Training
@@ -57,9 +57,9 @@ Train basic SVM classifier and save trained model to custom location
 dataset = csv_reader("data/sample.csv")
 from data_reader import csv_reader
 from train import Classifier
-dataset = csv_reader("data/sample.csv")
-classifier = Classifier(dataframe=dataset,embedding_type='glove',train_vectorizre = False, save_dir='models/')
-classifier.train_predict()
+classifier, = Classifier(dataframe=dataset,embeddings_model_type='sentence_transformer',vectorizer_path = None)
+model_path = classifier.train_predict()
+eval = evaluator(classifier)
 ```
 
 ### Evaluation
@@ -72,7 +72,15 @@ print (eval.recall())
 print (eval.accuracy())
 ```
 
+### Prediction
+Predictions using pre-trained model at certain path
 
+```
+test_dataset = csv_reader("data/test.csv")
+classifier = Classifier(dataframe=dataset,embeddings_model_type='sentence_transformer',vectorizer_path = None)
+pred_list,test_list = classifier.predict(model_path='models/svm.pkl')
+print(pred_list)
+```
 ### Download Embeddings
 This repository would store all your pre-trained or fine-tuned embedding models. Also, we suggest storing your trained models here (.pkl (pickle), .npy (numpy), .hd5 are good methods to store trained models.)
 
