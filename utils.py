@@ -6,7 +6,7 @@ FOLDER_train_data = data_folder+'train/'
 
 
 TOKENS_MAX_LENGTH = 128
-TRAIN_BATCH_SIZE = 32
+TRAIN_BATCH_SIZE = 16
 TEST_BATCH_SIZE = 4
 EPOCHS = 10
 

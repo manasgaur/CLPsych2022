@@ -9,6 +9,7 @@ import torch
 import re
 import string
 import json
+from torch.utils.data import Dataset, DataLoader
 
 from utils import FILE_train_users, FOLDER_train_data 
 
@@ -86,37 +87,33 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-class BertDataset:
-    def __init__(self,text,target):
-        self.txt = text
-        self.target = target
-#         self.keyword = keyword
-#         self.location = location
-        self.tokenizer = TOKENIZER
-        self.max_len = TOKENS_MAX_LENGTH
-    def __len__(self):
-        return len(self.tweet)
-    
-    def __getitem__(self,item):
-        txt = re.sub(r'http\S+', '', self.txt[item]) ###removes URL from tweets
-        txt = " ".join(str(txt).split())
+class BertDataset(Dataset):
+    def __init__(self, dataframe, tokenizer, max_len):
+        self.len = len(dataframe)
+        self.data = dataframe.reset_index(drop=True)
+        self.tokenizer = tokenizer
+        self.max_len = max_len
         
-        
+    def __getitem__(self, index):
+        title = str(self.data.content[index])
+        title = " ".join(title.split())
         inputs = self.tokenizer.encode_plus(
-            txt,
+            title,
             None,
             add_special_tokens=True,
             max_length=self.max_len,
-            padding=True,truncation=True
+            padding='max_length',
+            return_token_type_ids=True,
+            truncation=True
         )
-        
-        ids = inputs["input_ids"]
-        mask = inputs["attention_mask"]
-        token_type_ids = inputs["token_type_ids"]
-        
+        ids = inputs['input_ids']
+        mask = inputs['attention_mask']
+
         return {
-            "ids": torch.tensor(ids, dtype=torch.long),
-            "mask" : torch.tensor(mask, dtype=torch.long),
-            "token_type_ids" : torch.tensor(token_type_ids, dtype=torch.long),
-            "targets": torch.tensor(self.target[item], dtype=torch.float),
-        }   
+            'ids': torch.tensor(ids, dtype=torch.long),
+            'mask': torch.tensor(mask, dtype=torch.long),
+            'targets': torch.tensor(self.data.label[index], dtype=torch.long)
+        } 
+    
+    def __len__(self):
+        return self.len
